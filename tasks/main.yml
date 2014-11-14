@@ -1,0 +1,76 @@
+---
+
+- name: create groups
+  group:
+    name: '{{ item.groupname }}'
+    gid: '{{ item.gid }}'
+  with_items: users_groups_available
+  when: users_groups_available is defined
+
+- name: create groups for users
+  group:
+    name: '{{ item.username }}'
+    gid: '{{ item.uid }}'
+  with_items: users_available
+  when: users_available is defined
+
+
+- name: create users
+  user:
+    name: '{{ item.username }}'
+    group: '{{ item.username }}'
+    groups: '{{ item.groups|join(",") }}'
+    shell: '{{ item.shell }}'
+    comment: '{{ item.name }}'
+    uid: '{{ item.uid if item.uid }}'
+    createhome: '{{ item.createhomedir }}'
+    password: '{{ item.password }}'
+    update_password: '{{ item.update_password }}'
+  with_items: users_available
+  when: users_available is defined
+
+
+- name: create .ssh directory
+  file:
+    path: '~{{ item.username }}/.ssh'
+    owner: '{{ item.username }}'
+    group: '{{ item.username }}'
+    state: directory
+    mode: 0750
+  with_items: users_available
+  when: users_available is defined and item.createhomedir and item.upload_key
+
+- name: upload ssh keys
+  copy:
+    src: '{{ item.username }}.pub'
+    dest: '~{{ item.username }}/.ssh/authorized_keys'
+    owner: '{{ item.username }}'
+    group: '{{ item.username }}'
+    mode: 0640
+  with_items: users_available
+  when: users_available is defined and item.createhomedir and item.upload_key
+
+- name: remove users
+  user:
+    name: '{{ item }}'
+    state: absent
+    remove: yes
+  with_items: users_deleted
+  when: users_deleted is defined
+
+
+- name: remove groups for users
+  group:
+    name: '{{ item }}'
+    state: absent
+  with_items: users_deleted
+  when: users_deleted is defined
+
+- name: remove groups
+  group:
+    name: '{{ item }}'
+    state: absent
+  with_items: users_groups_deleted
+  when: users_groups_deleted is defined
+
+
