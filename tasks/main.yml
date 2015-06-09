@@ -29,24 +29,10 @@
   with_items: users_available
   when: users_available is defined
 
-
-- name: create .ssh directory
-  file:
-    path: '~{{ item.username }}/.ssh'
-    owner: '{{ item.username }}'
-    group: '{{ item.username }}'
-    state: directory
-    mode: 0750
-  with_items: users_available
-  when: users_available is defined and item.createhomedir and item.upload_key
-
-- name: upload ssh keys
-  copy:
-    src: '{{ item.username }}.pub'
-    dest: '~{{ item.username }}/.ssh/authorized_keys'
-    owner: '{{ item.username }}'
-    group: '{{ item.username }}'
-    mode: 0640
+- name: set authorized_keys for users
+  authorized_key:
+    user: '{{ item.username }}'
+    key: '{{ lookup("file", "../files/" + item.username + ".pub") }}'
   with_items: users_available
   when: users_available is defined and item.createhomedir and item.upload_key
 
