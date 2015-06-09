@@ -14,7 +14,6 @@
   with_items: users_available
   when: users_available is defined
 
-
 - name: create users
   user:
     name: '{{ item.username }}'
@@ -43,7 +42,6 @@
     remove: yes
   with_items: users_deleted
   when: users_deleted is defined
-
 
 - name: remove groups for users
   group:
