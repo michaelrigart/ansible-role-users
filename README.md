@@ -1,6 +1,5 @@
 Ansible users Role
 ==================
-[![Build Status](https://semaphoreci.com/api/v1/projects/eec95248-45e8-456c-93dc-eb110c739eba/461777/badge.svg)](https://semaphoreci.com/michaelrigart/ansible-role-users)
 
 An ansible role for managing users and groups.
 
@@ -34,7 +33,7 @@ Example Playbook
 ```yaml
 - hosts: servers
   roles:
-     - { role: MichaelRigart.users, sudo: Yes }
+     - { role: MichaelRigart.users, become: true }
 ```
 License
 -------
