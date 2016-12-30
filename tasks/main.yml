@@ -4,15 +4,13 @@
   group:
     name: '{{ item.groupname }}'
     gid: '{{ item.gid }}'
-  with_items: users_groups_available
-  when: users_groups_available is defined
+  with_items: '{{ users_groups_available | default([]) }}'
 
 - name: create groups for users
   group:
     name: '{{ item.username }}'
     gid: '{{ item.uid }}'
-  with_items: users_available
-  when: users_available is defined
+  with_items: '{{ users_available | default([]) }}'
 
 - name: create users
   user:
@@ -25,36 +23,30 @@
     createhome: '{{ item.createhomedir }}'
     password: '{{ item.password }}'
     update_password: '{{ item.update_password }}'
-  with_items: users_available
-  when: users_available is defined
+  with_items: '{{ users_available | default([]) }}'
 
 - name: set authorized_keys for users
   authorized_key:
     user: '{{ item.username }}'
     key: '{{ lookup("file", "../files/" + item.username + ".pub") }}'
-  with_items: users_available
-  when: users_available is defined and item.createhomedir and item.upload_key
+  with_items: '{{ users_available | default([]) }}'
+  when: item.createhomedir and item.upload_key
 
 - name: remove users
   user:
     name: '{{ item }}'
     state: absent
     remove: yes
-  with_items: users_deleted
-  when: users_deleted is defined
+  with_items: '{{ users_deleted | default([]) }}'
 
 - name: remove groups for users
   group:
     name: '{{ item }}'
     state: absent
-  with_items: users_deleted
-  when: users_deleted is defined
+  with_items: '{{ users_deleted | default([]) }}'
 
 - name: remove groups
   group:
     name: '{{ item }}'
     state: absent
-  with_items: users_groups_deleted
-  when: users_groups_deleted is defined
-
-
+  with_items: '{{ users_groups_deleted | default([]) }}'
